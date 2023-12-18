@@ -1,0 +1,183 @@
+---
+id: 1
+title: convert json to csv in python - Step-by-Step Guide
+keywords: json to csv in python
+description: how to convert json to csv in python - Step-by-Step Guide
+tags:
+  - csv
+  - json
+---
+***we have summarized several common ways for you: example using Python's built-in modules, example using Pandas, and showing the code through pure python. In addition, we've provided a series of solutions to common problems to help you navigate the world of Python more easily.***
+
+## what is a csv file 
+
+
+A CSV (Comma-Separated Values) file is a plain text file that stores tabular data (numbers and text) in a plain, human-readable format. Each line of the file represents a row of the table, and the values within each row are separated by commas or other delimiters.
+
+Key characteristics of CSV files include:
+- Plain Text Format: CSV files are plain text files, meaning they can be opened and edited using any text editor.
+- Tabular Structure: Data is organized in rows and columns, forming a tabular structure similar to a spreadsheet or a database table.
+- Comma-Separated Values: While the term "Comma-Separated Values" suggests the use of commas as delimiters, other characters like semicolons, tabs, or spaces can also be used. The choice of delimiter depends on the specific requirements and conventions.
+- No Data Types: CSV files do not include information about data types. All values are treated as text, and interpretation of data types is left to the software reading the file.
+
+Here is an example of a simple CSV file:
+```text
+Name,Age,City
+John,30,New York
+Alice,25,San Francisco
+Bob,35,Los Angeles
+```
+In this example, each line represents a row, and the values within each row are separated by commas. The first row typically contains column headers (Name, Age, City) to label the data in each column.
+
+
+
+## Use python built-in modules, no need to install additional python packages
+```python
+import csv
+import json
+
+# Sample JSON data
+json_data = '[{"Name": "John", "Age": 30, "City": "New York"}, {"Name": "Alice", "Age": 25, "City": "San Francisco"}]'
+
+# Load JSON data
+data = json.loads(json_data)
+
+# Specify CSV file name
+csv_file = 'output.csv'
+
+# Open CSV file in write mode
+with open(csv_file, 'w', newline='') as csvfile:
+    # Create CSV writer
+    csv_writer = csv.writer(csvfile)
+
+    # Write header
+    csv_writer.writerow(data[0].keys())
+
+    # Write data
+    for row in data:
+        csv_writer.writerow(row.values())
+
+print(f'Conversion successful. CSV file saved as {csv_file}')
+```
+
+## How to Convert JSON to CSV using Pandas
+
+```python
+import pandas as pd
+import json
+
+# Sample JSON data
+json_data = [
+    {"Name": "John", "Age": 30, "Address": {"City": "New York", "Zip": 10001}},
+    {"Name": "Alice", "Age": 25, "Address": {"City": "San Francisco", "Zip": 94105}},
+]
+
+# Convert JSON to DataFrame
+df = pd.json_normalize(json_data)
+
+# Specify CSV file name
+csv_file = 'output.csv'
+
+# Save DataFrame to CSV
+df.to_csv(csv_file, index=False)
+
+print(f'Conversion successful. CSV file saved as {csv_file}')
+```
+
+## Pure Python implementation without any dependencies on any libraries
+```python
+import json
+
+
+def flatten_json(json_data, separator='_'):
+    result = []
+
+    def flatten(item, parent_key='', sep=separator):
+        if isinstance(item, dict):
+            for key, value in item.items():
+                new_key = f"{parent_key}{sep}{key}" if parent_key else key
+                flatten(value, new_key, sep)
+        else:
+            result.append({parent_key: item})
+
+    flatten(json_data)
+    return result
+
+
+def convert_json_to_csv(json_data, csv_file):
+    flattened_data = flatten_json(json_data)
+
+    with open(csv_file, 'w', newline='') as csvfile:
+        # Write header
+        if flattened_data:
+            header = ','.join(flattened_data[0].keys())
+            csvfile.write(f"{header}\n")
+
+            # Write data
+            for entry in flattened_data:
+                row = ','.join(map(str, entry.values()))
+                csvfile.write(f"{row}\n")
+
+
+# Sample JSON data
+json_data = [
+    {"Name": "John", "Age": 30, "Address": {"City": "New York", "Zip": 10001}},
+    {"Name": "Alice", "Age": 25, "Address": {"City": "San Francisco", "Zip": 94105}},
+]
+
+# Specify CSV file name
+csv_file = 'output.csv'
+
+# Convert JSON to CSV
+convert_json_to_csv(json_data, csv_file)
+
+print(f'Conversion successful. CSV file saved as {csv_file}')
+
+```
+
+
+## Common Problem
+**_Problem: Chinese or special characters appear garbled after the CSV file is opened._**   
+**Solution**: Make sure you use the correct encoding when opening the file, such as utf-8. You can use the encoding='utf-8' parameter in the open function.
+File path problem
+
+```python
+df.to_csv('data.csv',index=False,encoding='utf_8_sig')
+```
+**Note**: When utf-8 is invalid, you can try utf_8_sig
+<br/>
+
+**_Problem: The file path contains special characters or the file does not exist._**  
+
+Solution: Make sure the file path is correct, you can use an absolute path or a relative path. Be careful to escape special characters.
+CSV module reading and writing problems:
+<br/>
+
+**_Problem: An error occurred while reading and writing CSV files._**  
+Solution: Check the code that uses the csv module to make sure you are using the csv.reader or csv.writer object correctly. Note that the file is opened and closed correctly.
+CSV end of line issues:
+<br/>
+
+**_Problem: Different operating systems use different line endings, which may cause problems when reading CSV files._**  
+Solution: Use the newline='' parameter when opening the file, which helps deal with different line endings.
+Missing fields or blank rows issues:
+<br/>
+
+**_Problem: There are missing fields or empty lines in the CSV file._**  
+Solution: When processing CSV data, you can check for and handle missing fields. For empty lines, filtering can be done while reading.
+CSV header processing:
+<br/>
+
+**_Issue: Whether the CSV file contains headers (column names) may affect data processing._**  
+Workaround: When reading, you can use the next method of csv.reader to skip the header rows, or use csv.DictReader to access the data by column name.
+pandas handles large files:
+<br/>
+
+**_Issue: Using pandas to process large CSV files may cause memory issues._**  
+Workaround: For large files, you can use the chunksize parameter to break the file into smaller chunks, or use other memory-friendly methods.
+CSV writing timestamp format issue:
+<br/>
+
+**_Issue: When writing a CSV containing timestamps, the timestamp format may not be as expected._**  
+Workaround: Specify the correct timestamp format when writing, or perform proper timestamp parsing when reading.
+<br/>
